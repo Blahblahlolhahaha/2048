@@ -49,9 +49,8 @@ Enter the following commands in the terminal
 
 # TO_DO List:
 
-* Add highscore feature
 * Add configuration to change the group/person featured in the game
-* Check whether game has finished or not
+* Add dark mode
 * Improve animations
     
 
