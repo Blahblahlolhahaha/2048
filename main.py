@@ -2,7 +2,7 @@ import tkinter as tk
 from PIL import Image, ImageTk, ImageOps
 from pathlib import Path
 import random
-
+from config import *
 
 class App(tk.Tk):
     def __init__(self, screenName=None, baseName=None, className="Tk", useTk=1, sync=0, use=None):
@@ -14,17 +14,18 @@ class App(tk.Tk):
         self.switch(Welcome)
 
     def switch(self, frame):
-        new_frame = frame(self)
+        if frame is Welcome:
+            new_frame = frame(self,pady = 250)
+        else:
+            new_frame = frame(self)
         if self._frame is not None:
             self._frame.destroy()
         self._frame = new_frame
 
 
 class Welcome(tk.Frame):
-    def __init__(self, master=None):
-        super().__init__()
-        self.height = 600
-        self.width = 600
+    def __init__(self, master=None,**kw):
+        super().__init__(master=master,**kw)
         tk.Label(self, text="Welcome to 2048!", font=('Arial', 40)).pack()
         tk.Button(self, text="Start!", font=("Arial", 15), justify=tk.CENTER,
                   width=18, height=4, command=lambda: master.switch(Main)).pack()
@@ -40,7 +41,7 @@ class Main(tk.Frame):
         except FileNotFoundError:
             self.highscore = 0
         self.score = 0
-        game_container = tk.Frame(self, height=720, width=720, bg="#777777")
+        game_container = tk.Frame(self, height=720, width=720)
         self.all_cells = [[Cell(game_container, row=0, column=0, height=180, width=180), Cell(game_container, row=0, column=1, height=180, width=180), Cell(game_container, row=0, column=2, height=180, width=180), Cell(game_container, row=0, column=3, height=180, width=180)],
                           [Cell(game_container, row=1, column=0, height=180, width=180), Cell(game_container, row=1, column=1, height=180, width=180), Cell(
                               game_container, row=1, column=2, height=180, width=180), Cell(game_container, row=1, column=3, height=180, width=180)],
@@ -103,6 +104,9 @@ class Main(tk.Frame):
         return dead
 
     def refresh(self):
+        for y in self.all_cells:
+            for x in y:
+                x.merge = False
         while True:
             row = random.randint(0, 3)
             column = random.randint(0, 3)
@@ -129,28 +133,16 @@ class Main(tk.Frame):
     def go(self, new, old, direction, x, y, z):
         if direction == "+y":
             old.move(old.object, 0, old.y*180)
-            new.count = old.count
-            new.change_image()
-            old.count = 0
-            old.change_image()
         elif direction == "-y":
             old.move(old.object, 0, old.y*-180)
-            new.count = old.count
-            new.change_image()
-            old.count = 0
-            old.change_image()
         elif direction == "-x":
             old.move(old.object, old.x*-180, 0)
-            new.count = old.count
-            new.change_image()
-            old.count = 0
-            old.change_image()
         elif direction == "+x":
             old.move(old.object, old.x*+180, 0)
-            new.count = old.count
-            new.change_image()
-            old.count = 0
-            old.change_image()
+        new.count = old.count
+        new.change_image()
+        old.count = 0
+        old.change_image()
         old.x = 0
         old.y = 0
         new.x = 0
@@ -170,11 +162,14 @@ class Main(tk.Frame):
                         current.y += 1
                         moved, move = True, True
                     elif target.count == current.count:
+                        if target.merge:
+                            target = self.all_cells[z+1][x]
+                            break
                         current.y += 1
                         current.count += 1
                         self.add_points(current.count)
                         self.go(target, current, "-y", x, y, z)
-                        merged, merge = True, True
+                        merged, merge,target.merge = True, True, True
                         break
                     else:
                         target = self.all_cells[z+1][x]
@@ -214,11 +209,14 @@ class Main(tk.Frame):
                         current.y += 1
                         moved, move = True, True
                     elif target.count == current.count:
+                        if target.merge:
+                            target = self.all_cells[z-1][x]
+                            break
                         current.y += 1
                         current.count += 1
                         self.add_points(current.count)
                         self.go(target, current, "+y", x, y, z)
-                        merged, merge = True, True
+                        merged, merge,target.merge = True, True, True
                         break
                     else:
                         target = self.all_cells[z-1][x]
@@ -258,11 +256,14 @@ class Main(tk.Frame):
                         current.x += 1
                         moved, move = True, True
                     elif target.count == current.count:
+                        if target.merge:
+                            target = self.all_cells[y][z+1]
+                            break
                         current.x += 1
                         current.count += 1
                         self.add_points(current.count)
                         self.go(target, current, "-x", x, y, z)
-                        merged, merge = True, True
+                        merged, merge,target.merge = True, True, True
                         break
                     else:
                         target = self.all_cells[y][z+1]
@@ -301,6 +302,9 @@ class Main(tk.Frame):
                         current.x += 1
                         moved, move = True, True
                     elif target.count == current.count:
+                        if target.merge:
+                            target = self.all_cells[y][z-1]
+                            break
                         current.x += 1
                         current.count += 1
                         self.add_points(current.count)
@@ -335,13 +339,14 @@ class Cell(tk.Canvas):
     def __init__(self, master=None, row=0, column=0, count=0, **kw):
         super().__init__(master=master, **kw)
         self.gone = False
+        self.merge = False
         self.row = row
         self.column = column
         self.y = 0
         self.x = 0
         self.count = count
         self.image = Image.open(
-            f"{str(Path(__file__).absolute()).strip('main.py')}picture/{picture[self.count]}")
+            f"{str(Path(__file__).absolute()).strip('main.py')}picture/{theme}/{picture[self.count]}")
         resized = self.image.resize((180, 180))
         # self.picture = tk.PhotoImage(self.image,master=self)
         self.picture = ImageTk.PhotoImage(resized)
@@ -351,13 +356,19 @@ class Cell(tk.Canvas):
     def change_image(self):
         self.delete("all")
         self.image = Image.open(
-            f"{str(Path(__file__).absolute()).strip('main.py')}picture/{picture[self.count]}")
+            f"{str(Path(__file__).absolute()).strip('main.py')}picture/{theme}/{picture[self.count]}")
         resized = self.image.resize((180, 180))
         self.picture = ImageTk.PhotoImage(resized)
         self.object = self.create_image(0, 0, image=self.picture, anchor=tk.NW)
 
 
 if __name__ == "__main__":
+    themes = ["Classical","Aqours","Mayday","Pokemon"]
+    if not theme in themes:
+        print("The chosen theme in config.py is invalid! Please choose from Classical, Aqours, Mayday or Pokemon!")
+        SystemExit(0)
+    if not Dark == True or not Dark == False:
+        Dark = False 
     picture = ["0.png", "2.png", "4.png", "8.png", "16.png", "32.png", "64.png",
                "128.png", "256.png", "512.png", "1024.png", "2048.png", "4096.png", "8192.png"]
     game = App()
