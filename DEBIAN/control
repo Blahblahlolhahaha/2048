@@ -1,0 +1,8 @@
+Package: 2048
+Version: 1.0
+Architecture: all
+Maintainer: Jess pikachuuu1436@gmail.com
+Depends: python3
+Installed-Size: 8480.526
+Homepage: localhost
+Description: A 2048 game!

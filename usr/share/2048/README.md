@@ -9,6 +9,11 @@ Enter the following commands in the terminal
     git clone https://github.com/Blahblahlolhahaha/2048/
     cd 2048
     python main.py
+
+If u are using linux, you can install it by downloading 2048.deb and enter the following commands in the terminal:
+    
+    dpkg --install 2048.deb
+    python3 2048.py # to launch the game!
     
 
 ## Instructions
