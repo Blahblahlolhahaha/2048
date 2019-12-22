@@ -3,7 +3,7 @@ A 2048 game!
 
 ## How to install and play!
 
-Enter the following commands in the terminal (Assuming if you have already installed python3)
+Enter the following commands in the terminal/Powershell (Assuming if you have already installed python3)
 
     pip install Pillow
     git clone https://github.com/Blahblahlolhahaha/2048/
