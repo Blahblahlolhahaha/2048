@@ -38,7 +38,7 @@ Enter the following commands in the terminal
 
 
 #### Change themes:
-To change themes, simply go to config.py and change the value for theme to one of the following:
+To change themes, simply go settings to choose one of the following themes below and to choose whether to enable dark mode or not!:
 
 * Classical
 * Aqours

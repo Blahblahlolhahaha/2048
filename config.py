@@ -1,4 +1,22 @@
 # Please input from Classical,Aqours,Mayday or Pokemon
-theme = "Classical"
+theme = "Aqours"
 # Dark theme
-Dark = False
+Dark = True
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

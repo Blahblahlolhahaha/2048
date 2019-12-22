@@ -3,7 +3,7 @@ from PIL import Image, ImageTk, ImageOps
 from pathlib import Path
 import random
 from config import *
-
+import time
 
 class App(tk.Tk):
     def __init__(self, screenName=None, baseName=None, className="Tk", useTk=1, sync=0, use=None):
@@ -18,7 +18,7 @@ class App(tk.Tk):
 
     def switch(self, frame):
         if frame is Welcome:
-            new_frame = frame(self, pady=250)
+            new_frame = frame(self, pady=100)
         else:
             new_frame = frame(self)
         if self._frame is not None:
@@ -32,16 +32,153 @@ class Welcome(tk.Frame):
         if Dark:
             self.config(background="#000000")
             tk.Label(self, text="Welcome to 2048!", font=(
-                'Arial', 40), bg="#000000", fg="#AAAAAA").pack()
+                'Arial', 40), bg="#000000", fg="#AAAAAA").grid(row=0)
             tk.Button(self, text="Start!", font=("Arial", 15), justify=tk.CENTER,
-                      width=18, height=4, bg="#000000", fg="#AAAAAA", command=lambda: master.switch(Main)).pack()
+                      width=18, height=4, bg="#000000", fg="#AAAAAA", command=lambda: master.switch(Main)).grid(row=1,pady=20)
+            tk.Button(self, text="Settings", font=("Arial", 15), justify=tk.CENTER,
+                      width=18, height=4, bg="#000000", fg="#AAAAAA", command=lambda: master.switch(Settings)).grid(row=2,pady=20)
+            tk.Button(self, text="Exit", font=("Arial", 15), justify=tk.CENTER,
+                      width=18, height=4,bg="#000000", fg="#AAAAAA", command=lambda: master.destroy()).grid(row=3,pady=20)
         else:
-            tk.Label(self, text="Welcome to 2048!", font=('Arial', 40)).pack()
+            tk.Label(self, text="Welcome to 2048!",
+                     font=('Arial', 40)).grid(row=0)
             tk.Button(self, text="Start!", font=("Arial", 15), justify=tk.CENTER,
-                      width=18, height=4, command=lambda: master.switch(Main)).pack()
+                      width=18, height=4, command=lambda: master.switch(Main)).grid(row=1,pady=20)
+            tk.Button(self, text="Settings", font=("Arial", 15), justify=tk.CENTER,
+                      width=18, height=4, command=lambda: master.switch(Settings)).grid(row=2,pady=20)
+            tk.Button(self, text="Exit", font=("Arial", 15), justify=tk.CENTER,
+                      width=18, height=4, command=lambda: master.destroy()).grid(row=3,pady=20)
 
         self.pack()
 
+
+class Settings(tk.Frame):
+    def __init__(self, master=None, **kw):
+        super().__init__(master=master, **kw)
+        theme_frame = tk.Frame(self)
+        dark_mode = tk.Frame(self)
+        confirm = tk.Frame(self)
+
+        if Dark:
+            self.config(background="#000000")
+            dark_mode.config(background="#000000")
+            theme_frame.config(background="#000000")
+            confirm.config(background="#000000", pady=50)
+            tk.Label(self, text="Choose your theme!", font=(
+                'Arial', 20), bg="#000000", fg="#AAAAAA").grid(row=0)
+            count = 0
+            self.v = tk.IntVar()
+            self.i = tk.IntVar()
+            for x in themes:
+                tk.Radiobutton(theme_frame,
+                               text=x,
+                               indicatoron=0,
+                               width=20,
+                               height=5,
+                               padx=20,
+                               pady=20,
+                               variable=self.v,
+                               bg="#000000",
+                               fg="#AAAAAA",
+                               value=count).grid(row=1, column=count+1)
+                count += 1
+            tk.Label(self, text="Dark mode?", font=(
+                'Arial', 20), bg="#000000", fg="#AAAAAA", pady=20).grid(row=2)
+            tk.Radiobutton(dark_mode,
+                           text="Yes",
+                           indicatoron=0,
+                           width=20,
+                           height=5,
+                           padx=20,
+                           pady=20,
+                           variable=self.i,
+                           bg="#000000",
+                           fg="#AAAAAA",
+                           value=1).grid(row=0, column=0)
+            tk.Radiobutton(dark_mode,
+                           text="No",
+                           indicatoron=0,
+                           width=20,
+                           height=5,
+                           padx=20,
+                           pady=20,
+                           variable=self.i,
+                           bg="#000000",
+                           fg="#AAAAAA",
+                           value=0).grid(row=0, column=1)
+            tk.Button(confirm, text="Ok", font=("Arial", 15), justify=tk.CENTER,
+                      width=8, height=4, bg="#000000", fg="#AAAAAA", command=lambda: self.change()).grid(row=0, column=0)
+            tk.Button(confirm, text="Cancel", font=("Arial", 15), justify=tk.CENTER,
+                      width=8, height=4, bg="#000000", fg="#AAAAAA", command=lambda: master.switch(Welcome)).grid(row=0, column=1)
+        else:
+            tk.Label(self, text="Choose your theme!", font=(
+                'Arial', 20)).grid(row=0)
+            count = 0
+            self.v = tk.IntVar()
+            self.i = tk.IntVar()
+            for x in themes:
+                tk.Radiobutton(theme_frame,
+                               text=x,
+                               indicatoron=0,
+                               width=20,
+                               height=5,
+                               padx=20,
+                               pady=20,
+                               variable=self.v,
+                               value=count).grid(row=1, column=count+1)
+                count += 1
+            tk.Label(self, text="Dark mode?", font=(
+                'Arial', 20), pady=20).grid(row=2)
+            tk.Radiobutton(dark_mode,
+                           text="Yes",
+                           indicatoron=0,
+                           width=20,
+                           height=5,
+                           padx=20,
+                           pady=20,
+                           variable=self.i,
+                           value=1).grid(row=0, column=0)
+            tk.Radiobutton(dark_mode,
+                           text="No",
+                           indicatoron=0,
+                           width=20,
+                           height=5,
+                           padx=20,
+                           pady=20,
+                           variable=self.i,
+                           value=0).grid(row=0, column=1)
+            tk.Button(confirm, text="Ok", font=("Arial", 15), justify=tk.CENTER,
+                      width=8, height=4, command=lambda: self.change()).grid(row=0, column=0)
+            tk.Button(confirm, text="Cancel", font=("Arial", 15), justify=tk.CENTER,
+                      width=8, height=4, command=lambda: master.switch(Welcome)).grid(row=0, column=1)
+        theme_frame.grid(row=1)
+        dark_mode.grid(row=3)
+        confirm.grid(row=4)
+        self.pack()
+
+    def change(self):
+        with open("config.py", "r") as f:
+            hola = f.read().split("\n")
+        with open("config.py", "w") as f:
+            hola[1] = f'theme = "{themes[self.v.get()]}"'
+            if self.i.get() == 1:
+                hola[3] = "Dark = True"
+            else:
+                hola[3] = "Dark = False"
+            for x in hola:
+                f.write(f"{x}\n")
+        self.destroy()
+        if Dark:
+            leave = tk.Label(game, text="Please restart the game for the changes to take effect!", font=(
+                'Arial', 30),justify=tk.CENTER, bg="#000000", fg="#AAAAAA",pady=20,padx=280)
+            tk.Button(game, text="Exit", font=("Arial", 15), justify=tk.CENTER,
+                      width=18, height=4,bg="#000000", fg="#AAAAAA", command=lambda: game.destroy()).grid(row=1,sticky=tk.N)
+        else:
+            leave = tk.Label(game, text="Please restart the game for the changes to take effect!",justify=tk.CENTER, font=(
+                            'Arial', 30), pady=20,padx=280)
+            tk.Button(game, text="Exit", font=("Arial", 15), justify=tk.CENTER,
+                      width=18, height=4, command=lambda: game.destroy()).grid(row=1)
+        leave.grid(row=0,sticky=tk.N)
 
 class Main(tk.Frame):
     def __init__(self, master=None, **kw):
@@ -71,22 +208,26 @@ class Main(tk.Frame):
             self.config(background="#000000")
             score.config(background="#000000")
             tk.Label(score, font=("Arial", 20), bg="#000000", fg="#AAAAAA", justify=tk.LEFT,
-                     textvariable=self.points).grid(row=1, sticky=tk.W, padx=5)
+                     textvariable=self.points).grid(row=1, sticky=tk.W, padx=3)
             tk.Label(score, font=("Arial", 20), bg="#000000", fg="#AAAAAA", justify=tk.LEFT,
-                     textvariable=self.over).grid(row=2, sticky=tk.W, padx=5)
+                     textvariable=self.over).grid(row=2, sticky=tk.W, padx=3)
             tk.Label(score, font=("Arial", 20), bg="#000000", fg="#AAAAAA", justify=tk.LEFT,
-                     textvariable=self.broke).grid(row=3, sticky=tk.W, padx=5)
-            tk.Button(score, text="New game!", font=("Arial", 20),justify=tk.LEFT,
-                      bg="#333333", fg="#AAAAAA", command=lambda: game.switch(Main)).grid(row=0, sticky=tk.W, padx=5, pady=30)
+                     textvariable=self.broke).grid(row=3, sticky=tk.W, padx=3)
+            tk.Button(score, text="New game!", font=("Arial", 20), justify=tk.LEFT,
+                      bg="#333333", fg="#AAAAAA", command=lambda: game.switch(Main)).grid(row=0, column=0, sticky=tk.W, padx=3, pady=30)
+            tk.Button(score, text="Return to main menu!", font=("Arial", 20), justify=tk.LEFT,
+                      bg="#333333", fg="#AAAAAA", command=lambda: game.switch(Welcome)).grid(row=0, column=1, sticky=tk.W, padx=3, pady=30)
         else:
-            tk.Label(score, font=("Arial", 20),justify=tk.LEFT,
-                     textvariable=self.points).grid(row=1, sticky=tk.W, padx=5)
-            tk.Label(score, font=("Arial", 20),justify=tk.LEFT,
-                     textvariable=self.over).grid(row=2, sticky=tk.W, padx=5)
-            tk.Label(score, font=("Arial", 20),justify=tk.LEFT,
-                     textvariable=self.broke).grid(row=3, sticky=tk.W, padx=5)
-            tk.Button(score, text="New game!", font=("Arial", 20),justify=tk.LEFT,
-                      command=lambda: game.switch(Main)).grid(row=0, sticky=tk.W, padx=5, pady=30)
+            tk.Label(score, font=("Arial", 20), justify=tk.LEFT,
+                     textvariable=self.points).grid(row=1, sticky=tk.W, padx=3)
+            tk.Label(score, font=("Arial", 20), justify=tk.LEFT,
+                     textvariable=self.over).grid(row=2, sticky=tk.W, padx=3)
+            tk.Label(score, font=("Arial", 20), justify=tk.LEFT,
+                     textvariable=self.broke).grid(row=3, sticky=tk.W, padx=3)
+            tk.Button(score, text="New game!", font=("Arial", 20), justify=tk.LEFT,
+                      command=lambda: game.switch(Main)).grid(row=0, sticky=tk.W, padx=3, pady=30)
+            tk.Button(score, text="Return to main menu!", font=("Arial", 20), justify=tk.LEFT,
+                      command=lambda: game.switch(Welcome)).grid(row=0, column=1, sticky=tk.W, padx=3, pady=30)
         score.grid(row=0, column=1, sticky=tk.N)
         self.bind("<Up>", self.up)
         self.bind("<Down>", self.down)
@@ -393,7 +534,7 @@ class Cell(tk.Canvas):
 
 
 if __name__ == "__main__":
-    themes = ["Classical", "Aqours", "Mayday", "Pokemon"]
+    themes = ["Classical", "Aqours", "Mayday"]
     if not theme in themes:
         print("The chosen theme in config.py is invalid! Please choose from Classical, Aqours, Mayday or Pokemon!")
         SystemExit(0)
