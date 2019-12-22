@@ -3,11 +3,11 @@ A 2048 game!
 
 ## How to install and play!
 
-Enter the following commands in the terminal/Powershell (Assuming if you have already installed python3)
+Enter the following commands in the terminal (Assuming if you have already installed python3)
 
     pip install Pillow
     git clone https://github.com/Blahblahlolhahaha/2048/
-    cd 2048
+    cd 2048/usr/share/2048
     python main.py
 
 If u are using linux, you can install it by downloading 2048.deb and enter the following commands in the terminal:
