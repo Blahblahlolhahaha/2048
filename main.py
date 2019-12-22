@@ -4,18 +4,21 @@ from pathlib import Path
 import random
 from config import *
 
+
 class App(tk.Tk):
     def __init__(self, screenName=None, baseName=None, className="Tk", useTk=1, sync=0, use=None):
         super().__init__(screenName=screenName, baseName=baseName,
                          className=className, useTk=useTk, sync=sync, use=use)
-        self.geometry("1200x720")
+        self.geometry("1500x720")
         self.resizable(0, 0)
+        if Dark:
+            self.config(background="#000000")
         self._frame = None
         self.switch(Welcome)
 
     def switch(self, frame):
         if frame is Welcome:
-            new_frame = frame(self,pady = 250)
+            new_frame = frame(self, pady=250)
         else:
             new_frame = frame(self)
         if self._frame is not None:
@@ -24,11 +27,19 @@ class App(tk.Tk):
 
 
 class Welcome(tk.Frame):
-    def __init__(self, master=None,**kw):
-        super().__init__(master=master,**kw)
-        tk.Label(self, text="Welcome to 2048!", font=('Arial', 40)).pack()
-        tk.Button(self, text="Start!", font=("Arial", 15), justify=tk.CENTER,
-                  width=18, height=4, command=lambda: master.switch(Main)).pack()
+    def __init__(self, master=None, **kw):
+        super().__init__(master=master, **kw)
+        if Dark:
+            self.config(background="#000000")
+            tk.Label(self, text="Welcome to 2048!", font=(
+                'Arial', 40), bg="#000000", fg="#AAAAAA").pack()
+            tk.Button(self, text="Start!", font=("Arial", 15), justify=tk.CENTER,
+                      width=18, height=4, bg="#000000", fg="#AAAAAA", command=lambda: master.switch(Main)).pack()
+        else:
+            tk.Label(self, text="Welcome to 2048!", font=('Arial', 40)).pack()
+            tk.Button(self, text="Start!", font=("Arial", 15), justify=tk.CENTER,
+                      width=18, height=4, command=lambda: master.switch(Main)).pack()
+
         self.pack()
 
 
@@ -39,6 +50,8 @@ class Main(tk.Frame):
             with open("score.txt") as f:
                 self.highscore = int(f.read())
         except FileNotFoundError:
+            self.highscore = 0
+        except ValueError:
             self.highscore = 0
         self.score = 0
         game_container = tk.Frame(self, height=720, width=720)
@@ -52,11 +65,28 @@ class Main(tk.Frame):
         score = tk.Frame(self, height=720, width=720)
         self.points = tk.StringVar()
         self.over = tk.StringVar()
+        self.broke = tk.StringVar()
         self.points.set(f"Score: 0\nHighscore:{self.highscore}")
-        tk.Label(score, font=("Arial", 20),
-                 textvariable=self.points, justify=tk.LEFT).pack()
-        tk.Label(score, font=("Arial", 20),
-                 textvariable=self.over, justify=tk.LEFT).pack()
+        if Dark:
+            self.config(background="#000000")
+            score.config(background="#000000")
+            tk.Label(score, font=("Arial", 20), bg="#000000", fg="#AAAAAA", justify=tk.LEFT,
+                     textvariable=self.points).grid(row=1, sticky=tk.W, padx=5)
+            tk.Label(score, font=("Arial", 20), bg="#000000", fg="#AAAAAA", justify=tk.LEFT,
+                     textvariable=self.over).grid(row=2, sticky=tk.W, padx=5)
+            tk.Label(score, font=("Arial", 20), bg="#000000", fg="#AAAAAA", justify=tk.LEFT,
+                     textvariable=self.broke).grid(row=3, sticky=tk.W, padx=5)
+            tk.Button(score, text="New game!", font=("Arial", 20),justify=tk.LEFT,
+                      bg="#333333", fg="#AAAAAA", command=lambda: game.switch(Main)).grid(row=0, sticky=tk.W, padx=5, pady=30)
+        else:
+            tk.Label(score, font=("Arial", 20),justify=tk.LEFT,
+                     textvariable=self.points).grid(row=1, sticky=tk.W, padx=5)
+            tk.Label(score, font=("Arial", 20),justify=tk.LEFT,
+                     textvariable=self.over).grid(row=2, sticky=tk.W, padx=5)
+            tk.Label(score, font=("Arial", 20),justify=tk.LEFT,
+                     textvariable=self.broke).grid(row=3, sticky=tk.W, padx=5)
+            tk.Button(score, text="New game!", font=("Arial", 20),justify=tk.LEFT,
+                      command=lambda: game.switch(Main)).grid(row=0, sticky=tk.W, padx=5, pady=30)
         score.grid(row=0, column=1, sticky=tk.N)
         self.bind("<Up>", self.up)
         self.bind("<Down>", self.down)
@@ -119,10 +149,10 @@ class Main(tk.Frame):
     def finish(self):
         string = "Game over!\n"
         if self.score == self.highscore:
-            string += ("Congratulations you have beaten your high score!")
+            self.broke.set("Congratulations you have beaten your high score!")
             with open("score.txt", "w+") as f:
                 f.write(str(self.highscore))
-        self.over.set(string)
+        self.over.set("Game over!")
 
     def add_points(self, count):
         self.score += 2**count
@@ -169,7 +199,7 @@ class Main(tk.Frame):
                         current.count += 1
                         self.add_points(current.count)
                         self.go(target, current, "-y", x, y, z)
-                        merged, merge,target.merge = True, True, True
+                        merged, merge, target.merge = True, True, True
                         break
                     else:
                         target = self.all_cells[z+1][x]
@@ -216,7 +246,7 @@ class Main(tk.Frame):
                         current.count += 1
                         self.add_points(current.count)
                         self.go(target, current, "+y", x, y, z)
-                        merged, merge,target.merge = True, True, True
+                        merged, merge, target.merge = True, True, True
                         break
                     else:
                         target = self.all_cells[z-1][x]
@@ -263,7 +293,7 @@ class Main(tk.Frame):
                         current.count += 1
                         self.add_points(current.count)
                         self.go(target, current, "-x", x, y, z)
-                        merged, merge,target.merge = True, True, True
+                        merged, merge, target.merge = True, True, True
                         break
                     else:
                         target = self.all_cells[y][z+1]
@@ -363,13 +393,13 @@ class Cell(tk.Canvas):
 
 
 if __name__ == "__main__":
-    themes = ["Classical","Aqours","Mayday","Pokemon"]
+    themes = ["Classical", "Aqours", "Mayday", "Pokemon"]
     if not theme in themes:
         print("The chosen theme in config.py is invalid! Please choose from Classical, Aqours, Mayday or Pokemon!")
         SystemExit(0)
-    if not Dark == True or not Dark == False:
-        Dark = False 
     picture = ["0.png", "2.png", "4.png", "8.png", "16.png", "32.png", "64.png",
                "128.png", "256.png", "512.png", "1024.png", "2048.png", "4096.png", "8192.png"]
+    if Dark:
+        picture[0] = "0_dark.png"
     game = App()
     game.mainloop()
